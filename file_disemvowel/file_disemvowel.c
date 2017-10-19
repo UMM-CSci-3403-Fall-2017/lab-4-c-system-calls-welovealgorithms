@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -29,11 +30,12 @@ int copy_non_vowels(int num_chars, char* in_buf, char* out_buf) {
   int numberOfCopies = 0;
 
   for(int i = 0; i < num_chars; i++) {
-    if(!(is_vowel(in_buf[i])) {
+    if(!(is_vowel(in_buf[i]))) {
 	out_buf[numberOfCopies] = in_buf[i];
 	numberOfCopies++;
       }
   }
+
     return numberOfCopies;
 }
 
@@ -45,24 +47,53 @@ void disemvowel(FILE* inputFile, FILE* outputFile) {
      * use fwrite to write that out. 
      */
 
-  char* in_buf = calloc(BUF_SIZE, sizeof(char));
-	char* out_buf = calloc(BUF_SIZE, sizeof(char));
-	fopen(inputFile, "w+");
-	fopen(outputFile, "w+");
-	while(fgets(in_buf,sizeof(in_buf),inputFile)){
-		printf("%s\n",in_buf);
+        char in_buf[BUF_SIZE];
+	char out_buf[BUF_SIZE];
+       
+        if(inputFile != NULL && outputFile != NULL) {
+	  while(fread(in_buf, 1, BUF_SIZE, inputFile) == BUF_SIZE) {
+	    int sizeOfOutput = copy_non_vowels(sizeof(in_buf), in_buf, out_buf);
+	    fwrite(out_buf, 1, sizeOfOutput, outputFile);
+	  }
+	} else if(inputFile != NULL && outputFile == NULL) {
+	   while(fread(in_buf, 1, BUF_SIZE, inputFile) == BUF_SIZE) {
+	    int sizeOfOutput = copy_non_vowels(sizeof(in_buf), in_buf, out_buf);
+	    fwrite(out_buf, 1, sizeOfOutput, stdout);
+	  }
+	} else {
+	   while(fread(in_buf, 1, BUF_SIZE, stdin) == BUF_SIZE) {
+	    int sizeOfOutput = copy_non_vowels(sizeof(in_buf), in_buf, out_buf);
+	    fwrite(out_buf, 1, sizeOfOutput, stdout);
+	  }
 	}
-	fread(in_buf, 1024, 1, inputFile);
 }
 
 int main(int argc, char *argv[]) { 
-    FILE *inputFile; 
-    FILE *outputFile;
-
+    FILE *inputFile = NULL;
+    FILE *outputFile = NULL;
+    
     // Code that processes the command line arguments 
     // and sets up inputFile and outputFile.
 
-    disemvowel(inputFile, outputFile);
+    // Check to see if there are 3 arguements given and if so
+    // we set the outputFile to open the second arguement for
+    // reading and writing
+    if(argc == 3) {
+      inputFile = fopen(argv[1], "r");
+      outputFile = fopen(argv[2], "w+");
+      disemvowel(inputFile, outputFile);
+    } else if (argc == 2) {
+      inputFile = fopen(argv[1], "r");
+      disemvowel(inputFile, stdout);
+    } else {
+      disemvowel(stdin, stdout);
+    }
+
+    fflush(stdout);
+    fclose(inputFile);
+    fclose(outputFile);
+
+    
 
     return 0; 
 }
