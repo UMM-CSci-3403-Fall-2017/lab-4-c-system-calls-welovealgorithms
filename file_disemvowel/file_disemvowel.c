@@ -49,28 +49,32 @@ void disemvowel(FILE* inputFile, FILE* outputFile) {
 
         char in_buf[BUF_SIZE];
 	char out_buf[BUF_SIZE];
-       
-        if(inputFile != NULL && outputFile != NULL) {
+
+	if (inputFile != stdin) {
 	  while(fread(in_buf, 1, BUF_SIZE, inputFile) == BUF_SIZE) {
-	    int sizeOfOutput = copy_non_vowels(sizeof(in_buf), in_buf, out_buf);
-	    fwrite(out_buf, 1, sizeOfOutput, outputFile);
-	  }
-	} else if(inputFile != NULL && outputFile == NULL) {
-	   while(fread(in_buf, 1, BUF_SIZE, inputFile) == BUF_SIZE) {
-	    int sizeOfOutput = copy_non_vowels(sizeof(in_buf), in_buf, out_buf);
-	    fwrite(out_buf, 1, sizeOfOutput, stdout);
+	     int size = copy_non_vowels(sizeof(in_buf), in_buf, out_buf);
+	     fwrite(out_buf, 1, size, outputFile);
 	  }
 	} else {
-	   while(fread(in_buf, 1, BUF_SIZE, stdin) == BUF_SIZE) {
-	    int sizeOfOutput = copy_non_vowels(sizeof(in_buf), in_buf, out_buf);
-	    fwrite(out_buf, 1, sizeOfOutput, stdout);
+	  while(feof(inputFile) == 0) {
+	    
 	  }
 	}
+
+
+
+	
+	
+	
+
+	
+       
+       
 }
 
 int main(int argc, char *argv[]) { 
-    FILE *inputFile = NULL;
-    FILE *outputFile = NULL;
+    FILE *inputFile;
+    FILE *outputFile;
     
     // Code that processes the command line arguments 
     // and sets up inputFile and outputFile.
@@ -78,14 +82,17 @@ int main(int argc, char *argv[]) {
     // Check to see if there are 3 arguements given and if so
     // we set the outputFile to open the second arguement for
     // reading and writing
-    if(argc == 3) {
+    if(argc >= 3) {
       inputFile = fopen(argv[1], "r");
       outputFile = fopen(argv[2], "w+");
       disemvowel(inputFile, outputFile);
     } else if (argc == 2) {
       inputFile = fopen(argv[1], "r");
+      outputFile = stdout;
       disemvowel(inputFile, stdout);
     } else {
+      inputFile = stdin;
+      outputFile = stdout;
       disemvowel(stdin, stdout);
     }
 
