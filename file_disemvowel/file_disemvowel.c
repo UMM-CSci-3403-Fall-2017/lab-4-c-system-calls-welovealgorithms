@@ -9,14 +9,18 @@ bool is_vowel(char c) {
      * Returns true if c is a vowel (upper or lower case), and 
      * false otherwise. 
      */
-  char vowels[11] = {'a','e','i','o','u','A','E','I','O','U','\0'};
-  
+  char vowels[10] = {'a','e','i','o','u','A','E','I','O','U'};
+
+  // Go through the array of vowels
   for(int i = 0; i < 10; i++) {
+    
+    // If the char c matches a vowel we return true;
     if(c == vowels[i]) {
       return true;
     }
   }
-
+  
+  // Return false if no vowels have been found
   return false;
 }
 
@@ -27,16 +31,21 @@ int copy_non_vowels(int num_chars, char* in_buf, char* out_buf) {
      * and this function should return the number of non-vowels that
      * that were copied over.
      */
-  int numberOfCopies = 0;
+  int non_vowels = 0;
 
+  // Go through the in_buf char*
   for(int i = 0; i < num_chars; i++) {
+
+    // If the element in_buf[i] is not a vowel, we copy it to
+    // the out_buf char* and increment our non_vowels count
     if(!(is_vowel(in_buf[i]))) {
-	out_buf[numberOfCopies] = in_buf[i];
-	numberOfCopies++;
+	out_buf[non_vowels] = in_buf[i];
+	non_vowels++;
       }
   }
 
-    return numberOfCopies;
+  // Return the number of non_vowels
+    return non_vowels;
 }
 
 void disemvowel(FILE* inputFile, FILE* outputFile) { 
@@ -47,28 +56,46 @@ void disemvowel(FILE* inputFile, FILE* outputFile) {
      * use fwrite to write that out. 
      */
 
-        char in_buf[BUF_SIZE];
-	char out_buf[BUF_SIZE];
+  // Created our in_buf and out_buf buffers with size BUF_SIZE
+        char* in_buf = calloc(BUF_SIZE, sizeof(char));
+	char* out_buf = calloc(BUF_SIZE, sizeof(char));
+	int writeSize;
+	int chars;
+	bool isRunning = true;
+  
+	// Read from inputFile to the in_buf as long as there
+	// are elements left to read
+        while(isRunning) {
 
-	if (inputFile != stdin) {
-	  while(fread(in_buf, 1, BUF_SIZE, inputFile) == BUF_SIZE) {
-	     int size = copy_non_vowels(sizeof(in_buf), in_buf, out_buf);
-	     fwrite(out_buf, 1, size, outputFile);
+	  
+	  // Number of elements succesfully read from inputFile
+	  chars = fread(in_buf, 1, BUF_SIZE, inputFile);
+
+	  
+	  // fread returns 0 if it reaches the end of the file
+	  // If we're at the end then stop looping
+	  if (chars == 0) {
+	    isRunning = false;
 	  }
-	} else {
-	  while(feof(inputFile) == 0) {
-	    
-	  }
-	}
+	  
 
+	  // Copy the non-vowels from in_buf to out_buf and returns
+	  // the number of non-vowels copied over
+	  writeSize = copy_non_vowels(chars, in_buf, out_buf);
 
+	  
+	  // Writes to outputFile from out_buf 
+	  fwrite(out_buf, 1, writeSize, outputFile);
+        }
 
-	
-	
-	
+    // Close the input and output files
+    fclose(inputFile);
+    fclose(outputFile);
 
-	
-       
+    // Free the allocated buffer memmory
+    free(in_buf);
+    free(out_buf);
+
        
 }
 
@@ -79,28 +106,23 @@ int main(int argc, char *argv[]) {
     // Code that processes the command line arguments 
     // and sets up inputFile and outputFile.
 
-    // Check to see if there are 3 arguements given and if so
-    // we set the outputFile to open the second arguement for
-    // reading and writing
-    if(argc >= 3) {
+    // Check for how many arguements are given
+    // and based on that what the input and output
+    // files will be assigned
+    
+    if(argc == 3) {
       inputFile = fopen(argv[1], "r");
-      outputFile = fopen(argv[2], "w+");
-      disemvowel(inputFile, outputFile);
+      outputFile = fopen(argv[2], "w");
     } else if (argc == 2) {
       inputFile = fopen(argv[1], "r");
       outputFile = stdout;
-      disemvowel(inputFile, stdout);
-    } else {
+    } else if (argc == 1) {
       inputFile = stdin;
       outputFile = stdout;
-      disemvowel(stdin, stdout);
     }
 
-    fflush(stdout);
-    fclose(inputFile);
-    fclose(outputFile);
-
-    
-
+    // Disemvowels the given inputFile and writes it to the outputFile
+    disemvowel(inputFile, outputFile);
+    	  
     return 0; 
 }
